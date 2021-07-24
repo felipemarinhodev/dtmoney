@@ -1,14 +1,10 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useContext, useState } from 'react';
 import Modal from 'react-modal';
 import closeImg from '../../assets/close.svg';
 import incomeImg from '../../assets/income.svg';
 import outcomeImg from '../../assets/outcome.svg';
-import { api } from '../../services/api';
-import {
-	RadioBox,
-	Container,
-	TransactionTypeContainer,
-} from './styles';
+import { TransactionsContext } from '../../TransactionsContext';
+import { Container, RadioBox, TransactionTypeContainer } from './styles';
 
 interface NewTransactionModalProps {
   isOpen: boolean;
@@ -19,23 +15,22 @@ export function NewTransactionModal({
   isOpen,
   onRequestClose,
 }: NewTransactionModalProps) {
-	const [title, setTitle] = useState('');
-	const [value, setValue] = useState(0);
-	const [category, setCategory] = useState('');
+  const { createTransaction } = useContext(TransactionsContext);
+
+  const [title, setTitle] = useState('');
+  const [amount, setAmount] = useState(0);
+  const [category, setCategory] = useState('');
   const [type, setType] = useState('deposit');
 
-	function handleCreateNewTransaction(event: FormEvent) {
-		event.preventDefault();
-		const data = {
-			title,
-			value,
-			category,
-			type
-		};
-
-		api.post('transactions', data)
-		
-	}
+  function handleCreateNewTransaction(event: FormEvent) {
+    event.preventDefault();
+    createTransaction({
+      title,
+      amount,
+      category,
+      type,
+    })
+  }
 
   return (
     <Modal
@@ -54,22 +49,22 @@ export function NewTransactionModal({
       <Container onSubmit={handleCreateNewTransaction}>
         <h2>Cadastrar transação</h2>
         <input
-					placeholder="Título"
-					value={title}
-					onChange={event => setTitle(event.target.value)}
-				/>
+          placeholder="Título"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
         <input
-					placeholder="Valor"
-					type="number"
-					value={value}
-					onChange={event => setValue(Number(event.target.value))}
-				/>
+          placeholder="Valor"
+          type="number"
+          value={amount}
+          onChange={(event) => setAmount(Number(event.target.value))}
+        />
         <TransactionTypeContainer>
           <RadioBox
             type="button"
             onClick={() => setType('deposit')}
             isActive={type === 'deposit'}
-						activeColor="green"
+            activeColor="green"
           >
             <img src={incomeImg} alt="" />
             <span>Entrada</span>
@@ -78,17 +73,17 @@ export function NewTransactionModal({
             type="button"
             onClick={() => setType('withdraw')}
             isActive={type === 'withdraw'}
-						activeColor="red"
+            activeColor="red"
           >
             <img src={outcomeImg} alt="" />
             <span>Saída</span>
           </RadioBox>
         </TransactionTypeContainer>
         <input
-					placeholder="Categoria"
-					value={category}
-					onChange={event => setCategory(event.target.value)}
-				/>
+          placeholder="Categoria"
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+        />
         <button type="submit">Cadastrar</button>
       </Container>
     </Modal>
